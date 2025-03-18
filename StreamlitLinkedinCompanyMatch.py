@@ -12,9 +12,31 @@ import io
 
 
 chromedriver_autoinstaller.install()
+
 # Streamlit app
 st.title("LinkedIn Industry Scraper")
+
+# App description button
+if st.button("What does this app do?"):
+    st.info(
+        """This app allows you to upload an Excel file containing a list of companies. 
+        It will search for each company's LinkedIn page, extract the industry information, 
+        and provide a downloadable Excel file with the results. 
+        You will need to enter your LinkedIn credentials before running the scraper."""
+    )
+
 st.write("Upload an Excel file with a 'Company' column to extract LinkedIn industry data.")
+
+# Instructions for the uploaded file
+st.markdown(
+    """### File Requirements:
+    - The file must be in **Excel (.xlsx) format**.
+    - It must contain a column named **'Company'**.
+    - Other optional columns (if not present, they will be added):
+      - **Industry** (will be filled with extracted industry information)
+      - **LinkedIn URL** (will store the LinkedIn profile link of the company)
+    """
+)
 
 # User input for LinkedIn credentials
 username = st.text_input("LinkedIn Username", type="default")
@@ -36,10 +58,7 @@ if uploaded_file and username and password and st.button("Run Scraper"):
 
         # Configure Selenium WebDriver
         chrome_options = Options()
-        chrome_options.add_argument("--headless")  # Run without GUI
-        chrome_options.add_argument("--disable-gpu")  # Disable GPU acceleration
-        chrome_options.add_argument("--no-sandbox")  # Bypass OS security restrictions
-        chrome_options.add_argument("--disable-dev-shm-usage")  # Overcome limited resources in Docker/Linux
+        chrome_options.add_argument("--headless")
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
 
