@@ -10,8 +10,22 @@ from webdriver_manager.chrome import ChromeDriverManager
 import chromedriver_autoinstaller
 import io
 
-
+# Ensure ChromeDriver is installed
 chromedriver_autoinstaller.install()
+
+# Set up Chrome options for Streamlit Cloud
+chrome_options = Options()
+chrome_options.add_argument("--headless")  # Run without GUI
+chrome_options.add_argument("--disable-gpu")
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("--disable-dev-shm-usage")
+
+# Manually specify the Chrome binary location for Streamlit Cloud
+chrome_options.binary_location = "/usr/bin/google-chrome"
+
+# Start WebDriver
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+
 
 # Streamlit app
 st.title("LinkedIn Industry Scraper")
