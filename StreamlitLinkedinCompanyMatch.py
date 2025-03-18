@@ -7,8 +7,11 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
+import chromedriver_autoinstaller
 import io
 
+
+chromedriver_autoinstaller.install()
 # Streamlit app
 st.title("LinkedIn Industry Scraper")
 st.write("Upload an Excel file with a 'Company' column to extract LinkedIn industry data.")
@@ -33,7 +36,10 @@ if uploaded_file and username and password and st.button("Run Scraper"):
 
         # Configure Selenium WebDriver
         chrome_options = Options()
-        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--headless")  # Run without GUI
+        chrome_options.add_argument("--disable-gpu")  # Disable GPU acceleration
+        chrome_options.add_argument("--no-sandbox")  # Bypass OS security restrictions
+        chrome_options.add_argument("--disable-dev-shm-usage")  # Overcome limited resources in Docker/Linux
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
 
