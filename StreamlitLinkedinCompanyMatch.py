@@ -1,7 +1,8 @@
-import io
+import os
 import time
 import pandas as pd
 import streamlit as st
+import io
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -75,18 +76,21 @@ if uploaded_file and username and password and st.button("Run Scraper"):
             time.sleep(5)
 
 
-        linkedin_login()
+        try:
+            linkedin_login()
+        except Exception as e:
+            st.error(f"Login failed: {e}")
 
 
         # Search and extract LinkedIn data
         def search_company(company_name):
-            driver.get("https://www.google.com")
-            time.sleep(2)
-            search_box = driver.find_element("name", "q")
-            search_box.send_keys(f"{company_name} LinkedIn")
-            search_box.send_keys("\n")
-            time.sleep(3)
             try:
+                driver.get("https://www.google.com")
+                time.sleep(2)
+                search_box = driver.find_element("name", "q")
+                search_box.send_keys(f"{company_name} LinkedIn")
+                search_box.send_keys("\n")
+                time.sleep(3)
                 first_result = driver.find_element("xpath", "(//h3)[1]")
                 first_result.click()
                 time.sleep(2)
@@ -100,8 +104,8 @@ if uploaded_file and username and password and st.button("Run Scraper"):
                         return "Unknown Industry", current_url
                 else:
                     return "No Company Page", current_url
-            except:
-                return "No Results", ""
+            except Exception as e:
+                return f"Error: {e}", ""
 
 
         # Processing loop with progress updates
@@ -113,9 +117,13 @@ if uploaded_file and username and password and st.button("Run Scraper"):
         for index, row in df.iterrows():
             if pd.notna(row["Industry"]):
                 continue  # Skip if already processed
-            industry, url = search_company(row["Company"])
-            df.at[index, "Industry"] = industry
-            df.at[index, "LinkedIn URL"] = url
+            try:
+                industry, url = search_company(row["Company"])
+                df.at[index, "Industry"] = industry
+                df.at[index, "LinkedIn URL"] = url
+            except Exception as e:
+                df.at[index, "Industry"] = f"Error: {e}"
+                df.at[index, "LinkedIn URL"] = ""
 
             processed_count += 1
             progress_bar.progress(int((processed_count / total_companies) * 100))
@@ -123,8 +131,8 @@ if uploaded_file and username and password and st.button("Run Scraper"):
 
         driver.quit()
 
-        # Save the updated data to an Excel file
-        output =io.BytesIO()
+        # Save the updated data to an Excel file even if errors occur
+        output = io.BytesIO()
         df.to_excel(output, index=False)
         output.seek(0)
 
